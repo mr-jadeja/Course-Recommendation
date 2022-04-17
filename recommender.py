@@ -2,6 +2,8 @@
 Course Recommendation System
 """
 
+from cgitb import enable
+from soupsieve import escape
 import streamlit as st
 import pandas as pd 
 import numpy as np
@@ -12,7 +14,7 @@ import altair as alt
 from rake_nltk import Rake
 from nltk.corpus import stopwords 
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 FILTERED_COURSES = None
 SELECTED_COURSE = None
@@ -33,7 +35,7 @@ def clean_col_names(df, columns):
 
 @st.cache(allow_output_mutation=True)
 def load_data():
-	source_path1 = os.path.join("udemydataset/processed_data.csv")
+	source_path1 = os.path.join("udemydataset/finaldataset.csv")
 	df_overview = pd.read_csv(source_path1)
 	return df_overview
 	# df = pd.concat([df_overview, df_individual], axis=1)
@@ -117,7 +119,7 @@ def content_based_recommendations(df, input_course, courses):
 	# create Description keywords
 	df['descr_keywords'] = extract_keywords(df, 'Description')
 	# instantiating and generating the count matrix
-	count = CountVectorizer()
+	count = TfidfVectorizer()
 	count_matrix = count.fit_transform(df['descr_keywords'])
 	# generating the cosine similarity matrix
 	cosine_sim = cosine_similarity(count_matrix, count_matrix)
@@ -130,7 +132,12 @@ def content_based_recommendations(df, input_course, courses):
 
 	# top 3
 	st.write("Top 5 most similar courses")
-	st.write(temp_sim)
+	def make_clickable(link):
+		text = link
+		return f'<a target="_blank" href="{link}">{text}</a>'
+
+	temp_sim['Link'] = temp_sim['Link'].apply(make_clickable)
+	st.write(temp_sim.to_html(escape=False), unsafe_allow_html=True)
 	st.write("Top 5 most dissimilar courses")
 	st.write(temp_dissim)
 
@@ -172,6 +179,7 @@ def prep_for_cbr(df):
 		st.write("**Number of " + j + " types courses**",
 			skill_filtered[skill_filtered['Type']==j].shape[0])
 	# basic plots
+	print(skill_filtered)
 	chart = alt.Chart(skill_filtered).mark_bar().encode(
 		y = 'course_provided_by:N',
 		x = 'count(course_provided_by):Q'
