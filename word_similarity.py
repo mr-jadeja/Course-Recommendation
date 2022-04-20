@@ -11,21 +11,26 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sentence_transformers import SentenceTransformer
+import pickle
 
 
-class MatrixSimilarity():
+class MatrixSimilarity:
 	def __init__(self) -> None:
 		self.df = pd.read_csv("udemydataset/clean_dataset.csv")
 	def count_based(self):
 		count = CountVectorizer()
 		count_matrix = count.fit_transform(self.df['text_clean'])
 		print(count_matrix.shape) # (44554, 47601)
-		self.count_based_matrix = cosine_similarity(count_matrix, count_matrix)
+		self.hash_value = count_matrix
+		# with open('count_based_model.pickle', 'wb') as pkl:
+		# 	pickle.dump(count_matrix,pkl)
+		# return cosine_similarity(count_matrix, count_matrix)
 	def tfidf_based(self):
 		tfidf = TfidfVectorizer()
 		tfidf_matrix_train = tfidf.fit_transform(self.df['text_clean'])
+		# [[0.2,0.3]]
 		print(tfidf_matrix_train.shape)
-		self.tfidf_based_matrix = cosine_simiarity(tfidf_matrix_train,tfidf_matrix_train)
+		return cosine_similarity(tfidf_matrix_train,tfidf_matrix_train)
 	def bert_based(self):
 		model = SentenceTransformer('bert-base-nli-mean-tokens')
 		sen = []
@@ -33,10 +38,13 @@ class MatrixSimilarity():
 			sen.append(sent)
 		sen_embeddings = model.encode(sen)
 		print(sen_embeddings.shape)
-		new_class = model.encode(self.df['text_clean'])
-		print(new_class.shape)
-		self.bert_based_matrix = cosine_simiarity(sen_embeddings,sen_embeddings)
-
+		return cosine_similarity(sen_embeddings,sen_embeddings)
+	# def get_matrix_count(self):
+	# 	return self.count_based()
+	# def get_matrix_bert(self):
+	# 	return self.bert_based()
+	# def get_matrix_tfidf(self):
+	# 	return self.tfidf_based()
 # from gensim.models import Word2Vec
 # sen = []
 # for sent in df['test']:
@@ -46,3 +54,6 @@ class MatrixSimilarity():
 # model = Word2Vec(sen, min_count=1,size= 50,workers=3, window =3, sg = 1)
 
 # model.wv.vectors.shape
+
+# jk = MatrixSimilarity()
+# jk.count_based()
