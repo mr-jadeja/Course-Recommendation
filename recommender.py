@@ -38,7 +38,7 @@ def clean_col_names(df, columns):
 
 @st.cache(allow_output_mutation=True)
 def load_data():
-	source_path1 = os.path.join("udemydataset/clean_dataset.csv")
+	source_path1 = os.path.join("udemydataset/weighted_clean_dataset.csv")
 	df_overview = pd.read_csv(source_path1)
 	return df_overview
 	# df = pd.concat([df_overview, df_individual], axis=1)
@@ -100,18 +100,20 @@ def recommendations(df, input_course, cosine_sim, find_similar=True, how_many=5)
 	# zzzz = count.transform([df.iloc[[idx]]['text_clean']])
 	# print(zzzz)
 	cosine_sim_new = cosine_similarity(cosine_sim[idx],cosine_sim)
-	print(cosine_sim_new)
+
 	# creating a Series with the similarity scores in descending order
 	if(find_similar):
 		score_series = pd.Series(cosine_sim_new[0]).sort_values(ascending = False)
 	else:
 		score_series = pd.Series(cosine_sim_new[0]).sort_values(ascending = True)
-
+	score_series=score_series.to_frame()
+	joined_df = score_series.join(df)
+	joined_df.sort_values("weighted_rating",ascending = False)
 	# getting the indexes of the top 'how_many' courses
-	if(len(score_series) < how_many):
-		how_many = len(score_series)
+	if(len(joined_df) < how_many):
+		how_many = len(joined_df)
 
-	top_sugg = list(score_series.iloc[1:how_many+1].index)
+	top_sugg = list(joined_df.iloc[1:how_many+1].index)
 
 	# populating the list with the titles of the best 10 matching movies
 	for i in top_sugg:
