@@ -3,6 +3,7 @@ Course Recommendation System
 """
 
 from cgitb import enable
+from cmath import cos
 from soupsieve import escape
 import streamlit as st
 import pandas as pd 
@@ -15,6 +16,8 @@ from rake_nltk import Rake
 from nltk.corpus import stopwords 
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
+import word_similarity as ws
+global jk
 
 FILTERED_COURSES = None
 SELECTED_COURSE = None
@@ -35,7 +38,7 @@ def clean_col_names(df, columns):
 
 @st.cache(allow_output_mutation=True)
 def load_data():
-	source_path1 = os.path.join("udemydataset/finaldataset.csv")
+	source_path1 = os.path.join("udemydataset/clean_dataset.csv")
 	df_overview = pd.read_csv(source_path1)
 	return df_overview
 	# df = pd.concat([df_overview, df_individual], axis=1)
@@ -89,12 +92,20 @@ def recommendations(df, input_course, cosine_sim, find_similar=True, how_many=5)
 	
 	# index of the course fed as input
 	idx = selected_course.index[0]
-
+	# print(cosine_sim)
+	# print(idx)
+	# print(cosine_sim[idx])
+	# cosine_sim = jk.hash_value
+	# print(str(df.iloc[[idx]]['text_clean']))
+	# zzzz = count.transform([df.iloc[[idx]]['text_clean']])
+	# print(zzzz)
+	cosine_sim_new = cosine_similarity(cosine_sim[idx],cosine_sim)
+	print(cosine_sim_new)
 	# creating a Series with the similarity scores in descending order
 	if(find_similar):
-		score_series = pd.Series(cosine_sim[idx]).sort_values(ascending = False)
+		score_series = pd.Series(cosine_sim_new[0]).sort_values(ascending = False)
 	else:
-		score_series = pd.Series(cosine_sim[idx]).sort_values(ascending = True)
+		score_series = pd.Series(cosine_sim_new[0]).sort_values(ascending = True)
 
 	# getting the indexes of the top 'how_many' courses
 	if(len(score_series) < how_many):
@@ -120,24 +131,25 @@ def content_based_recommendations(df, input_course, courses):
 	df['descr_keywords'] = extract_keywords(df, 'Description')
 	# instantiating and generating the count matrix
 	count = TfidfVectorizer()
-	count_matrix = count.fit_transform(df['descr_keywords'])
+	count_matrix = count.fit_transform(df['text_clean'])
 	# generating the cosine similarity matrix
-	cosine_sim = cosine_similarity(count_matrix, count_matrix)
+	# cosine_sim = cosine_similarity(count_matrix, count_matrix)
 
 	# make the recommendation
-	rec_courses_similar = recommendations(df, input_course, cosine_sim, True)
+	rec_courses_similar = recommendations(df, input_course, count_matrix, True)
 	temp_sim = df[df['Title'].isin(rec_courses_similar)]
-	rec_courses_dissimilar = recommendations(df, input_course, cosine_sim, False)
+	rec_courses_dissimilar = recommendations(df, input_course, count_matrix, False)
 	temp_dissim = df[df['Title'].isin(rec_courses_dissimilar)]
 
 	# top 3
 	st.write("Top 5 most similar courses")
-	def make_clickable(link):
-		text = link
-		return f'<a target="_blank" href="{link}">{text}</a>'
+	# def make_clickable(link):
+	# 	text = link
+	# 	return f'<a target="_blank" href="{link}">{text}</a>'
 
-	temp_sim['Link'] = temp_sim['Link'].apply(make_clickable)
-	st.write(temp_sim.to_html(escape=False), unsafe_allow_html=True)
+	# temp_sim['Link'] = temp_sim['Link'].apply(make_clickable)
+	# st.write(temp_sim.to_html(escape=False), unsafe_allow_html=True)
+	st.write(temp_sim)
 	st.write("Top 5 most dissimilar courses")
 	st.write(temp_dissim)
 
@@ -179,7 +191,6 @@ def prep_for_cbr(df):
 		st.write("**Number of " + j + " types courses**",
 			skill_filtered[skill_filtered['Type']==j].shape[0])
 	# basic plots
-	print(skill_filtered)
 	chart = alt.Chart(skill_filtered).mark_bar().encode(
 		y = 'course_provided_by:N',
 		x = 'count(course_provided_by):Q'
