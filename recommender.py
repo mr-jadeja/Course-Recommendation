@@ -1,5 +1,5 @@
 """
-Course Recommendation System
+Course Recommeder System
 """
 
 from cgitb import enable
@@ -216,23 +216,23 @@ def prep_for_cbr(df):
 
 def main():
 
-	st.title("Course Recommendation")
+	st.title("Course Recommeder System")
 	st.write("Exploring Courses on Udemy")
 	st.sidebar.title("Set your Parameters")
 	st.sidebar.header("Preliminary Inspection")
 	st.header("About the Project")
-	st.write("Course Recommendation is a minimalistic system built to help learners"
+	st.write("Course Recommeder System is a minimalistic system built to help learners"
 		" navigate through the courses on Udemy, aided by a"
 		" data-driven strategy. A learner could visualize different"
 		" features provided in the dataset or interact with this app"
-		" to find suitable courses to take. Course Recommendation also can help"
+		" to find suitable courses to take. Course Recommeder System also can help"
 		" identify suitable courses for a learner based on their"
 		" learning preferences.")
 
 	# load and disp data
 	df = load_data()
 	st.header("Dataset Used")
-	st.write("For the purpose of building Course Recommendation, data from Udemy"
+	st.write("For the purpose of building Course Recommeder System, data from Udemy"
 		" dataset has been pulled out from kaggel opensource database which"
 		" has around 44k cources available")
 	st.markdown("Toggle the **Display raw data** checkbox on the sidebar"
