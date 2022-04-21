@@ -112,7 +112,7 @@ def recommendations(df, input_course, cosine_sim, find_similar=True, how_many=5)
 	# getting the indexes of the top 'how_many' courses
 	if(len(joined_df) < how_many):
 		how_many = len(joined_df)
-	new_joined_df = joined_df.head(how_many)
+	new_joined_df = joined_df.head(how_many+1)
 	print("befor-sort",new_joined_df)
 	if(find_similar):
 		new_joined_df=new_joined_df.sort_values("weighted_rating",ascending = False)
@@ -151,7 +151,7 @@ def content_based_recommendations(df, input_course, courses):
 	temp_dissim =temp_dissim.sort_values("weighted_rating",ascending = True)
 
 	# top 3
-	st.write("Top 5 most similar courses")
+	st.write("Top most similar courses")
 	# def make_clickable(link):
 	# 	text = link
 	# 	return f'<a target="_blank" href="{link}">{text}</a>'
@@ -159,7 +159,7 @@ def content_based_recommendations(df, input_course, courses):
 	# temp_sim['Link'] = temp_sim['Link'].apply(make_clickable)
 	# st.write(temp_sim.to_html(escape=False), unsafe_allow_html=True)
 	st.write(temp_sim)
-	st.write("Top 5 most dissimilar courses")
+	st.write("Top most dissimilar courses")
 	st.write(temp_dissim)
 
 def prep_for_cbr(df):
