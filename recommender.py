@@ -108,13 +108,18 @@ def recommendations(df, input_course, cosine_sim, find_similar=True, how_many=5)
 		score_series = pd.Series(cosine_sim_new[0]).sort_values(ascending = True)
 	score_series=score_series.to_frame()
 	joined_df = score_series.join(df)
-	joined_df.sort_values("weighted_rating",ascending = False)
+	
 	# getting the indexes of the top 'how_many' courses
 	if(len(joined_df) < how_many):
 		how_many = len(joined_df)
-
-	top_sugg = list(joined_df.iloc[1:how_many+1].index)
-
+	new_joined_df = joined_df.head(how_many)
+	print("befor-sort",new_joined_df)
+	if(find_similar):
+		new_joined_df=new_joined_df.sort_values("weighted_rating",ascending = False)
+	else:
+		new_joined_df =new_joined_df.sort_values("weighted_rating",ascending = True)
+	top_sugg = list(new_joined_df.iloc[1:how_many+1].index)
+	print("aftersort,",new_joined_df)
 	# populating the list with the titles of the best 10 matching movies
 	for i in top_sugg:
 		qualified = df['Title'].iloc[i]
@@ -130,7 +135,7 @@ def content_based_recommendations(df, input_course, courses):
 	# filter out the courses
 	df = df[df['Title'].isin(courses)].reset_index()
 	# create Description keywords
-	df['descr_keywords'] = extract_keywords(df, 'Description')
+	# df['descr_keywords'] = extract_keywords(df, 'Description')
 	# instantiating and generating the count matrix
 	count = TfidfVectorizer()
 	count_matrix = count.fit_transform(df['text_clean'])
@@ -140,8 +145,10 @@ def content_based_recommendations(df, input_course, courses):
 	# make the recommendation
 	rec_courses_similar = recommendations(df, input_course, count_matrix, True)
 	temp_sim = df[df['Title'].isin(rec_courses_similar)]
+	temp_sim =temp_sim.sort_values("weighted_rating",ascending = False)
 	rec_courses_dissimilar = recommendations(df, input_course, count_matrix, False)
 	temp_dissim = df[df['Title'].isin(rec_courses_dissimilar)]
+	temp_dissim =temp_dissim.sort_values("weighted_rating",ascending = True)
 
 	# top 3
 	st.write("Top 5 most similar courses")
