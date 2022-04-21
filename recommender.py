@@ -146,9 +146,9 @@ def content_based_recommendations(df, input_course, courses):
 	rec_courses_similar = recommendations(df, input_course, count_matrix, True)
 	temp_sim = df[df['Title'].isin(rec_courses_similar)]
 	temp_sim =temp_sim.sort_values("weighted_rating",ascending = False)
-	rec_courses_dissimilar = recommendations(df, input_course, count_matrix, False)
-	temp_dissim = df[df['Title'].isin(rec_courses_dissimilar)]
-	temp_dissim =temp_dissim.sort_values("weighted_rating",ascending = True)
+	# rec_courses_dissimilar = recommendations(df, input_course, count_matrix, False)
+	# temp_dissim = df[df['Title'].isin(rec_courses_dissimilar)]
+	# temp_dissim =temp_dissim.sort_values("weighted_rating",ascending = True)
 
 	# top 3
 	st.write("Top most similar courses")
@@ -159,8 +159,8 @@ def content_based_recommendations(df, input_course, courses):
 	# temp_sim['Link'] = temp_sim['Link'].apply(make_clickable)
 	# st.write(temp_sim.to_html(escape=False), unsafe_allow_html=True)
 	st.write(temp_sim)
-	st.write("Top most dissimilar courses")
-	st.write(temp_dissim)
+	# st.write("Top most dissimilar courses")
+	# st.write(temp_dissim)
 
 def prep_for_cbr(df):
 
